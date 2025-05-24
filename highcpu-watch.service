@@ -1,0 +1,14 @@
+[Unit]
+Description=High CPU Monitor Script
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/highcpu-watch.sh
+Restart=always
+RestartSec=10
+User=yourusername
+Nice=10
+
+[Install]
+WantedBy=multi-user.target
