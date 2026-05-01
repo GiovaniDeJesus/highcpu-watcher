@@ -1,0 +1,26 @@
+name: Sync Release Notes
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  save-release-notes:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Save release notes to file
+        run: |
+          mkdir -p docs/releases
+          echo "${{ github.event.release.body }}" > docs/releases/${{ github.event.release.tag_name }}.md
+
+      - name: Commit and push
+        run: |
+          git config user.name "Giovani De Jesus"
+          git config user.email "giovanidejesus560@gmail.com"
+          git add docs/releases/
+          git commit -m "docs: add release notes for ${{ github.event.release.tag_name }}" || echo "No changes"
+          git push
