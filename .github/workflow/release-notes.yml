@@ -14,16 +14,19 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Save release notes to file
         run: |
           mkdir -p docs/releases
-          echo "${{ github.event.release.body }}" > docs/releases/${{ github.event.release.tag_name }}.md
+          echo "# Release ${{ github.event.release.tag_name }}" > docs/releases/${{ github.event.release.tag_name }}.md
+          echo "${{ github.event.release.body }}" >> docs/releases/${{ github.event.release.tag_name }}.md
 
       - name: Commit and push
         run: |
           git config user.name "Giovani De Jesus"
           git config user.email "giovanidejesus560@gmail.com"
           git add docs/releases/
-          git commit -m "docs: add release notes for ${{ github.event.release.tag_name }}" || echo "No changes"
-          git push
+          git commit -m "docs: add release notes for ${{ github.event.release.tag_name }}" || echo "Nothing to commit"
+          git push origin main
