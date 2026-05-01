@@ -10,7 +10,6 @@ permissions:
 jobs:
   save-release-notes:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -18,15 +17,31 @@ jobs:
           ref: main
 
       - name: Save release notes to file
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_BODY: ${{ github.event.release.body }}
+          RELEASE_NAME: ${{ github.event.release.name }}
+          RELEASE_DATE: ${{ github.event.release.published_at }}
         run: |
           mkdir -p docs/releases
-          echo "# Release ${{ github.event.release.tag_name }}" > docs/releases/${{ github.event.release.tag_name }}.md
-          echo "${{ github.event.release.body }}" >> docs/releases/${{ github.event.release.tag_name }}.md
+          {
+            echo "# Release ${RELEASE_TAG}"
+            echo ""
+            echo "**Released:** ${RELEASE_DATE}"
+            echo ""
+            echo "${RELEASE_BODY}"
+          } > "docs/releases/latest.md"
 
       - name: Commit and push
         run: |
-          git config user.name "Giovani De Jesus"
-          git config user.email "giovanidejesus560@gmail.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add docs/releases/
-          git commit -m "docs: add release notes for ${{ github.event.release.tag_name }}" || echo "Nothing to commit"
-          git push origin main
+          if git diff --staged --quiet; then
+            echo "Nothing to commit"
+          else
+            git commit -m "docs: update release notes for ${RELEASE_TAG}"
+            git push origin main
+          fi
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
